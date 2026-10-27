@@ -1,0 +1,41 @@
+{
+  "name": "hrms-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@react-pdf/renderer": "^3.1.14",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.7.0",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.2",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "install": "^0.13.0",
+    "jsonwebtoken": "^9.0.2",
+    "md5": "^2.3.0",
+    "mongoose": "^8.18.0",
+    "mssql": "^12.5.4",
+    "multer": "^2.0.2",
+    "nodemailer": "^8.0.11",
+    "nodemon": "^3.1.10",
+    "npm": "^11.18.0",
+    "pdfkit": "^0.18.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sequelize": "^6.37.8",
+    "tedious": "^19.2.1",
+    "xlsx": "^0.18.5"
+  }
+}

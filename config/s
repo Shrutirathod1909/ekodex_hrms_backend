@@ -1,0 +1,108 @@
+
+const sql = require("mssql");
+require("dotenv").config();
+
+const UPLOAD_BASE_URL = "https://odshrmsapi.myapplications.co.in/";
+const DOC_BASE_URL = "https://hrms.myapplications.co.in/api/";
+const EMP_DOC_BASE_URL = "https://hrms.myapplications.co.in/api/emp_docs";
+
+const config = {
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_DATABASE,
+  port: Number(process.env.DB_PORT || 1433),
+
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000,
+  },
+
+  connectionTimeout: 15000,
+  requestTimeout: 60000,
+
+  options: {
+    encrypt: true,
+    trustServerCertificate: true,
+    enableArithAbort: true,
+  },
+};
+
+let poolPromise = null;
+
+async function connectWithRetry(retries = 3) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    let pool;
+
+    try {
+      console.log(`SQL connection attempt ${attempt}/${retries}`);
+
+      pool = new sql.ConnectionPool(config);
+
+      pool.on("error", (err) => {
+        console.error(
+          "❌ SQL Pool Error:",
+          err.code,
+          err.message
+        );
+      });
+
+      await pool.connect();
+
+      console.log("✅ SQL Server connected successfully");
+      return pool;
+    } catch (err) {
+      lastError = err;
+
+      console.error(
+        `❌ SQL connection attempt ${attempt} failed:`,
+        err.code,
+        err.message
+      );
+
+      if (pool) {
+        await pool.close().catch(() => {});
+      }
+
+      if (attempt < retries) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, attempt * 2000)
+        );
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+function getPool() {
+  if (!poolPromise) {
+    poolPromise = connectWithRetry().catch((err) => {
+      // Allow a future API request to try connecting again.
+      poolPromise = null;
+      throw err;
+    });
+  }
+
+  return poolPromise;
+}
+
+// Initial connection failure is logged, not left unhandled.
+getPool().catch((err) => {
+  console.error(
+    "❌ Initial database connection failed:",
+    err.code,
+    err.message
+  );
+});
+
+module.exports = {
+  sql,
+  getPool,
+  UPLOAD_BASE_URL,
+  DOC_BASE_URL,
+  EMP_DOC_BASE_URL,
+};
